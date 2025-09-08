@@ -136,7 +136,7 @@ def sync_ldap_user(db: Session, ldap_data: dict) -> User:
         # Update existing user
         user.name = ldap_data.get("cn", user.name)
         user.email = ldap_data.get("mail", user.email)
-        user.last_ldap_sync = datetime.utcnow()
+        user.last_ldap_sync = datetime.now()
         # Update other fields as needed
     else:
         # Create new user
@@ -148,7 +148,7 @@ def sync_ldap_user(db: Session, ldap_data: dict) -> User:
             ldap_dn=ldap_data.get("dn", ""),
             status="active",
             role="employee",  # Default role
-            last_ldap_sync=datetime.utcnow()
+            last_ldap_sync=datetime.now()
         )
         db.add(user)
     
