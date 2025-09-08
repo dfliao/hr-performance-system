@@ -1,0 +1,326 @@
+/**
+ * Main stylesheet - Global styles for HR Performance System
+ */
+
+// Import Element Plus theme variables
+@import 'element-plus/theme-chalk/src/common/var.scss';
+
+// Import custom variables
+@import './variables.scss';
+
+// Reset and base styles
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  background-color: $background-color;
+  color: $text-color-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Typography
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.4;
+  color: $text-color-primary;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
+
+p {
+  margin: 0 0 1rem;
+  line-height: 1.6;
+}
+
+a {
+  color: $primary-color;
+  text-decoration: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $primary-color-dark;
+  }
+}
+
+// Utility classes
+.text-primary { color: $primary-color !important; }
+.text-success { color: $success-color !important; }
+.text-warning { color: $warning-color !important; }
+.text-danger { color: $danger-color !important; }
+.text-info { color: $info-color !important; }
+.text-muted { color: $text-color-secondary !important; }
+
+.bg-primary { background-color: $primary-color !important; }
+.bg-success { background-color: $success-color !important; }
+.bg-warning { background-color: $warning-color !important; }
+.bg-danger { background-color: $danger-color !important; }
+.bg-info { background-color: $info-color !important; }
+.bg-light { background-color: $background-color-light !important; }
+
+// Spacing utilities
+.m-0 { margin: 0 !important; }
+.mt-0 { margin-top: 0 !important; }
+.mr-0 { margin-right: 0 !important; }
+.mb-0 { margin-bottom: 0 !important; }
+.ml-0 { margin-left: 0 !important; }
+
+.m-1 { margin: $spacing-xs !important; }
+.mt-1 { margin-top: $spacing-xs !important; }
+.mr-1 { margin-right: $spacing-xs !important; }
+.mb-1 { margin-bottom: $spacing-xs !important; }
+.ml-1 { margin-left: $spacing-xs !important; }
+
+.m-2 { margin: $spacing-sm !important; }
+.mt-2 { margin-top: $spacing-sm !important; }
+.mr-2 { margin-right: $spacing-sm !important; }
+.mb-2 { margin-bottom: $spacing-sm !important; }
+.ml-2 { margin-left: $spacing-sm !important; }
+
+.m-3 { margin: $spacing-md !important; }
+.mt-3 { margin-top: $spacing-md !important; }
+.mr-3 { margin-right: $spacing-md !important; }
+.mb-3 { margin-bottom: $spacing-md !important; }
+.ml-3 { margin-left: $spacing-md !important; }
+
+.m-4 { margin: $spacing-lg !important; }
+.mt-4 { margin-top: $spacing-lg !important; }
+.mr-4 { margin-right: $spacing-lg !important; }
+.mb-4 { margin-bottom: $spacing-lg !important; }
+.ml-4 { margin-left: $spacing-lg !important; }
+
+.p-0 { padding: 0 !important; }
+.pt-0 { padding-top: 0 !important; }
+.pr-0 { padding-right: 0 !important; }
+.pb-0 { padding-bottom: 0 !important; }
+.pl-0 { padding-left: 0 !important; }
+
+.p-1 { padding: $spacing-xs !important; }
+.pt-1 { padding-top: $spacing-xs !important; }
+.pr-1 { padding-right: $spacing-xs !important; }
+.pb-1 { padding-bottom: $spacing-xs !important; }
+.pl-1 { padding-left: $spacing-xs !important; }
+
+.p-2 { padding: $spacing-sm !important; }
+.pt-2 { padding-top: $spacing-sm !important; }
+.pr-2 { padding-right: $spacing-sm !important; }
+.pb-2 { padding-bottom: $spacing-sm !important; }
+.pl-2 { padding-left: $spacing-sm !important; }
+
+.p-3 { padding: $spacing-md !important; }
+.pt-3 { padding-top: $spacing-md !important; }
+.pr-3 { padding-right: $spacing-md !important; }
+.pb-3 { padding-bottom: $spacing-md !important; }
+.pl-3 { padding-left: $spacing-md !important; }
+
+.p-4 { padding: $spacing-lg !important; }
+.pt-4 { padding-top: $spacing-lg !important; }
+.pr-4 { padding-right: $spacing-lg !important; }
+.pb-4 { padding-bottom: $spacing-lg !important; }
+.pl-4 { padding-left: $spacing-lg !important; }
+
+// Layout utilities
+.d-flex { display: flex !important; }
+.d-inline-flex { display: inline-flex !important; }
+.d-block { display: block !important; }
+.d-inline-block { display: inline-block !important; }
+.d-none { display: none !important; }
+
+.flex-row { flex-direction: row !important; }
+.flex-column { flex-direction: column !important; }
+.flex-wrap { flex-wrap: wrap !important; }
+.flex-nowrap { flex-wrap: nowrap !important; }
+
+.justify-content-start { justify-content: flex-start !important; }
+.justify-content-end { justify-content: flex-end !important; }
+.justify-content-center { justify-content: center !important; }
+.justify-content-between { justify-content: space-between !important; }
+.justify-content-around { justify-content: space-around !important; }
+
+.align-items-start { align-items: flex-start !important; }
+.align-items-end { align-items: flex-end !important; }
+.align-items-center { align-items: center !important; }
+.align-items-baseline { align-items: baseline !important; }
+.align-items-stretch { align-items: stretch !important; }
+
+.flex-1 { flex: 1 !important; }
+.flex-auto { flex: auto !important; }
+
+// Text utilities
+.text-left { text-align: left !important; }
+.text-center { text-align: center !important; }
+.text-right { text-align: right !important; }
+
+.font-weight-normal { font-weight: 400 !important; }
+.font-weight-medium { font-weight: 500 !important; }
+.font-weight-semibold { font-weight: 600 !important; }
+.font-weight-bold { font-weight: 700 !important; }
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Card and container styles
+.card {
+  background: white;
+  border-radius: $border-radius-lg;
+  box-shadow: $box-shadow-sm;
+  border: 1px solid $border-color-light;
+  overflow: hidden;
+  
+  &-header {
+    padding: $spacing-lg;
+    border-bottom: 1px solid $border-color-light;
+    background: $background-color-light;
+    
+    .card-title {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+  }
+  
+  &-body {
+    padding: $spacing-lg;
+  }
+  
+  &-footer {
+    padding: $spacing-md $spacing-lg;
+    background: $background-color-light;
+    border-top: 1px solid $border-color-light;
+  }
+}
+
+.page-container {
+  padding: $spacing-lg;
+  min-height: 100vh;
+}
+
+.content-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// Status badges
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: $border-radius-sm;
+  font-size: 0.75rem;
+  font-weight: 500;
+  
+  &.status-active {
+    background: rgba($success-color, 0.1);
+    color: $success-color;
+  }
+  
+  &.status-pending {
+    background: rgba($warning-color, 0.1);
+    color: $warning-color;
+  }
+  
+  &.status-inactive {
+    background: rgba($info-color, 0.1);
+    color: $info-color;
+  }
+  
+  &.status-error {
+    background: rgba($danger-color, 0.1);
+    color: $danger-color;
+  }
+}
+
+// Performance score styles
+.score-display {
+  font-size: 1.5rem;
+  font-weight: 600;
+  
+  &.score-excellent { color: $success-color; }
+  &.score-good { color: #22c55e; }
+  &.score-average { color: $warning-color; }
+  &.score-poor { color: $danger-color; }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .page-container {
+    padding: $spacing-md;
+  }
+  
+  .card-body {
+    padding: $spacing-md;
+  }
+  
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1.125rem; }
+}
+
+// Element Plus customizations
+.el-button {
+  border-radius: $border-radius-md;
+  
+  &.el-button--primary {
+    background-color: $primary-color;
+    border-color: $primary-color;
+    
+    &:hover {
+      background-color: $primary-color-dark;
+      border-color: $primary-color-dark;
+    }
+  }
+}
+
+.el-card {
+  border-radius: $border-radius-lg;
+  box-shadow: $box-shadow-sm;
+}
+
+.el-table {
+  .el-table__header-wrapper {
+    th {
+      background-color: $background-color-light;
+      font-weight: 600;
+    }
+  }
+}
+
+// Animation utilities
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(20px);
+  opacity: 0;
+}

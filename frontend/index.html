@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HR 績效管理系統 | GOGOPEAKS</title>
+    <meta name="description" content="事件驅動的績效管理系統，整合 Synology 基礎設施" />
+    <meta name="keywords" content="HR, 績效管理, 績效考核, 員工評估, Synology" />
+    <meta name="author" content="GOGOPEAKS.COM" />
+    
+    <!-- Theme colors -->
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="msapplication-TileColor" content="#2563eb" />
+    
+    <!-- Preconnect to domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Prevent FOUC -->
+    <style>
+      html {
+        font-family: 'Inter', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+        line-height: 1.6;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc;
+        color: #1e293b;
+      }
+      
+      .loading-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        z-index: 9999;
+      }
+      
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+      }
+      
+      .loading-text {
+        color: white;
+        margin-top: 20px;
+        font-size: 16px;
+        font-weight: 500;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      /* Hide loading when Vue is ready */
+      [v-cloak] .loading-container {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Loading screen -->
+      <div class="loading-container">
+        <div style="text-align: center;">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">載入 HR 績效管理系統...</div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
