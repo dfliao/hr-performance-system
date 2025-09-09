@@ -24,10 +24,10 @@ update_and_restart() {
     git pull origin main
     
     # 停止現有服務
-    docker-compose down
+    sudo docker-compose down
     
     # 重新建置並啟動
-    docker-compose up -d --build
+    sudo docker-compose up -d --build
     
     # 等待服務啟動
     sleep 15
@@ -39,7 +39,7 @@ update_and_restart() {
 # 重啟服務
 restart_services() {
     print_info "🔄 重啟服務..."
-    docker-compose restart
+    sudo docker-compose restart
     sleep 10
     check_status
 }
@@ -49,7 +49,7 @@ check_status() {
     print_info "📊 檢查服務狀態..."
     
     # 顯示容器狀態
-    docker-compose ps
+    sudo docker-compose ps
     
     # 檢查服務健康狀態
     echo ""
@@ -75,7 +75,7 @@ check_status() {
 # 顯示日誌
 show_logs() {
     print_info "📋 顯示服務日誌..."
-    docker-compose logs -f --tail=50
+    sudo docker-compose logs -f --tail=50
 }
 
 # 快速修復
@@ -83,13 +83,13 @@ quick_fix() {
     print_info "🔧 執行快速修復..."
     
     # 停止所有服務
-    docker-compose down
+    sudo docker-compose down
     
     # 清理
-    docker system prune -f
+    sudo docker system prune -f
     
     # 重新啟動
-    docker-compose up -d --build
+    sudo docker-compose up -d --build
     
     sleep 20
     check_status
@@ -100,16 +100,16 @@ deploy_prod() {
     print_info "🚀 部署生產環境..."
     
     # 停止開發環境
-    docker-compose down
+    sudo docker-compose down
     
     # 啟動生產環境
-    docker-compose -f docker-compose.prod.yml up -d --build
+    sudo docker-compose -f docker-compose.prod.yml up -d --build
     
     sleep 20
     
     # 檢查生產環境狀態
     print_info "📊 生產環境狀態："
-    docker-compose -f docker-compose.prod.yml ps
+    sudo docker-compose -f docker-compose.prod.yml ps
     
     if curl -s http://localhost:8004/health > /dev/null; then
         print_info "✅ 生產環境後端正常"

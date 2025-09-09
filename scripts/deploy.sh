@@ -37,7 +37,7 @@ print_header() {
 
 # Check if we're in the project directory
 check_project_dir() {
-    if [ ! -f "docker-compose.yml" ]; then
+    if [ ! -f "sudo docker-compose.yml" ]; then
         print_error "Please run this script from the project root directory"
         exit 1
     fi
@@ -60,10 +60,10 @@ deploy_dev() {
     print_header "部署開發環境"
     
     print_info "停止現有容器..."
-    docker-compose down || true
+    sudo sudo docker-compose down || true
     
     print_info "建置並啟動開發環境..."
-    docker-compose up -d --build
+    sudo sudo docker-compose up -d --build
     
     sleep 10
     check_services "dev"
@@ -74,10 +74,10 @@ deploy_prod() {
     print_header "部署生產環境"
     
     print_info "停止現有容器..."
-    docker-compose -f docker-compose.prod.yml down || true
+    sudo docker-compose -f sudo docker-compose.prod.yml down || true
     
     print_info "建置並啟動生產環境..."
-    docker-compose -f docker-compose.prod.yml up -d --build
+    sudo docker-compose -f sudo docker-compose.prod.yml up -d --build
     
     sleep 15
     check_services "prod"
@@ -90,7 +90,7 @@ update_and_restart() {
     update_code
     
     # Determine which environment is running
-    if docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
         print_info "檢測到生產環境正在運行..."
         deploy_prod
     else
@@ -103,14 +103,14 @@ update_and_restart() {
 restart_services() {
     print_header "重啟服務"
     
-    if docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
         print_info "重啟生產環境服務..."
-        docker-compose -f docker-compose.prod.yml restart
+        sudo docker-compose -f sudo docker-compose.prod.yml restart
         sleep 10
         check_services "prod"
     else
         print_info "重啟開發環境服務..."
-        docker-compose restart
+        sudo docker-compose restart
         sleep 10
         check_services "dev"
     fi
@@ -121,10 +121,10 @@ stop_services() {
     print_header "停止所有服務"
     
     print_info "停止生產環境服務..."
-    docker-compose -f docker-compose.prod.yml down || true
+    sudo docker-compose -f sudo docker-compose.prod.yml down || true
     
     print_info "停止開發環境服務..."
-    docker-compose down || true
+    sudo sudo docker-compose down || true
     
     print_info "✅ 所有服務已停止"
 }
@@ -133,12 +133,12 @@ stop_services() {
 show_logs() {
     print_header "顯示服務日誌"
     
-    if docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
         print_info "顯示生產環境日誌..."
-        docker-compose -f docker-compose.prod.yml logs -f --tail=100
+        sudo docker-compose -f sudo docker-compose.prod.yml logs -f --tail=100
     else
         print_info "顯示開發環境日誌..."
-        docker-compose logs -f --tail=100
+        sudo docker-compose logs -f --tail=100
     fi
 }
 
@@ -173,9 +173,9 @@ check_services() {
     # Show running containers
     print_info "運行中的容器："
     if [ "$env" = "prod" ]; then
-        docker-compose -f docker-compose.prod.yml ps
+        sudo docker-compose -f sudo docker-compose.prod.yml ps
     else
-        docker-compose ps
+        sudo docker-compose ps
     fi
     
     print_info "服務 URL："
@@ -188,14 +188,14 @@ check_services() {
 init_database() {
     print_header "初始化資料庫"
     
-    if docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
         print_info "在生產環境中初始化資料庫..."
-        docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
-        docker-compose -f docker-compose.prod.yml exec backend python scripts/create_sample_data.py
+        sudo docker-compose -f sudo docker-compose.prod.yml exec backend alembic upgrade head
+        sudo docker-compose -f sudo docker-compose.prod.yml exec backend python scripts/create_sample_data.py
     else
         print_info "在開發環境中初始化資料庫..."
-        docker-compose exec backend alembic upgrade head
-        docker-compose exec backend python scripts/create_sample_data.py
+        sudo docker-compose exec backend alembic upgrade head
+        sudo docker-compose exec backend python scripts/create_sample_data.py
     fi
     
     print_info "✅ 資料庫初始化完成"
@@ -211,10 +211,10 @@ backup_database() {
     TIMESTAMP=$(date +%Y%m%d_%H%M%S)
     BACKUP_FILE="$BACKUP_DIR/hr_performance_backup_$TIMESTAMP.sql"
     
-    if docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
-        docker-compose -f docker-compose.prod.yml exec postgres pg_dump -U postgres hr_performance > "$BACKUP_FILE"
+    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
+        sudo docker-compose -f sudo docker-compose.prod.yml exec postgres pg_dump -U postgres hr_performance > "$BACKUP_FILE"
     else
-        docker-compose exec postgres pg_dump -U postgres hr_performance > "$BACKUP_FILE"
+        sudo docker-compose exec postgres pg_dump -U postgres hr_performance > "$BACKUP_FILE"
     fi
     
     print_info "✅ 資料庫備份完成: $BACKUP_FILE"
@@ -225,16 +225,16 @@ cleanup() {
     print_header "清理 Docker 資源"
     
     print_info "清理未使用的容器..."
-    docker container prune -f
+    sudo docker container prune -f
     
     print_info "清理未使用的映像..."
-    docker image prune -f
+    sudo docker image prune -f
     
     print_info "清理未使用的卷..."
-    docker volume prune -f
+    sudo docker volume prune -f
     
     print_info "清理未使用的網路..."
-    docker network prune -f
+    sudo docker network prune -f
     
     print_info "✅ 清理完成"
 }
@@ -288,7 +288,7 @@ main() {
             show_logs
             ;;
         "status")
-            if docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+            if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
                 check_services "prod"
             else
                 check_services "dev"

@@ -30,7 +30,7 @@ print_header() {
 }
 
 # Check if we're in the project root
-if [ ! -f "docker-compose.yml" ]; then
+if [ ! -f "sudo docker-compose.yml" ]; then
     print_error "Please run this script from the project root directory"
     exit 1
 fi
@@ -41,7 +41,7 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v docker-compose &> /dev/null; then
+if ! command -v sudo docker-compose &> /dev/null; then
     print_error "Docker Compose is not installed. Please install Docker Compose first."
     exit 1
 fi
@@ -78,7 +78,7 @@ print_header "2. Setting up database"
 
 # Start database services
 print_status "Starting database and Redis services..."
-docker-compose up -d postgres redis
+sudo docker-compose up -d postgres redis
 
 # Wait for database to be ready
 print_status "Waiting for database to be ready..."
@@ -86,7 +86,7 @@ sleep 10
 
 # Run database migrations
 print_status "Running database migrations..."
-docker-compose exec backend alembic upgrade head || {
+sudo docker-compose exec backend alembic upgrade head || {
     print_warning "Migration failed. This might be expected if it's the first run."
 }
 
@@ -121,7 +121,7 @@ print_header "5. Starting all services"
 
 # Start all services
 print_status "Starting all services with Docker Compose..."
-docker-compose up -d
+sudo docker-compose up -d
 
 print_status "Waiting for services to be ready..."
 sleep 15
@@ -130,7 +130,7 @@ print_header "6. Creating sample data"
 
 # Create sample data (optional)
 print_status "Creating sample data..."
-docker-compose exec backend python scripts/create_sample_data.py || {
+sudo docker-compose exec backend python scripts/create_sample_data.py || {
     print_warning "Sample data creation failed. This might be expected if data already exists."
 }
 
@@ -147,11 +147,11 @@ echo "   - Database: localhost:5432"
 echo "   - Redis: localhost:6379"
 echo ""
 echo "🔧 Development Commands:"
-echo "   - View logs: docker-compose logs -f"
-echo "   - Stop services: docker-compose down"
-echo "   - Rebuild services: docker-compose build"
-echo "   - Run migrations: docker-compose exec backend alembic upgrade head"
-echo "   - Access database: docker-compose exec postgres psql -U postgres -d hr_performance"
+echo "   - View logs: sudo docker-compose logs -f"
+echo "   - Stop services: sudo docker-compose down"
+echo "   - Rebuild services: sudo docker-compose build"
+echo "   - Run migrations: sudo docker-compose exec backend alembic upgrade head"
+echo "   - Access database: sudo docker-compose exec postgres psql -U postgres -d hr_performance"
 echo ""
 echo "👤 Default Login:"
 echo "   - Username: admin"
@@ -165,14 +165,14 @@ print_status "Checking service health..."
 if curl -s http://localhost:8004/health > /dev/null; then
     print_status "✅ Backend is responding"
 else
-    print_warning "❌ Backend is not responding. Check logs with: docker-compose logs backend"
+    print_warning "❌ Backend is not responding. Check logs with: sudo docker-compose logs backend"
 fi
 
 # Check frontend health
 if curl -s http://localhost:3004 > /dev/null; then
     print_status "✅ Frontend is responding"
 else
-    print_warning "❌ Frontend is not responding. Check logs with: docker-compose logs frontend"
+    print_warning "❌ Frontend is not responding. Check logs with: sudo docker-compose logs frontend"
 fi
 
 print_status "Setup complete! Happy coding! 🎯"

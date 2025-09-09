@@ -32,10 +32,10 @@ print_header() {
 check_containers() {
     print_header "檢查 Docker 容器狀態"
     
-    if docker-compose ps | grep -q "postgres.*Up"; then
+    if sudo docker-compose ps | grep -q "postgres.*Up"; then
         print_info "✅ PostgreSQL 容器正在運行"
         POSTGRES_RUNNING=true
-    elif docker-compose -f docker-compose.prod.yml ps | grep -q "postgres.*Up"; then
+    elif sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "postgres.*Up"; then
         print_info "✅ PostgreSQL 容器正在運行 (生產環境)"
         POSTGRES_RUNNING=true
         PROD_ENV=true
@@ -46,7 +46,7 @@ check_containers() {
     
     if [ "$POSTGRES_RUNNING" = true ]; then
         if [ "$PROD_ENV" = true ]; then
-            COMPOSE_FILE="-f docker-compose.prod.yml"
+            COMPOSE_FILE="-f sudo docker-compose.prod.yml"
         else
             COMPOSE_FILE=""
         fi
@@ -58,7 +58,7 @@ check_db_connection() {
     print_header "檢查資料庫連接"
     
     if [ "$POSTGRES_RUNNING" = true ]; then
-        if docker-compose $COMPOSE_FILE exec postgres pg_isready -U postgres > /dev/null 2>&1; then
+        if sudo docker-compose $COMPOSE_FILE exec postgres pg_isready -U postgres > /dev/null 2>&1; then
             print_info "✅ 資料庫連接正常"
             DB_CONNECTED=true
         else
@@ -76,7 +76,7 @@ check_database_exists() {
     print_header "檢查資料庫是否存在"
     
     if [ "$DB_CONNECTED" = true ]; then
-        if docker-compose $COMPOSE_FILE exec postgres psql -U postgres -lqt | cut -d \| -f 1 | grep -qw hr_performance; then
+        if sudo docker-compose $COMPOSE_FILE exec postgres psql -U postgres -lqt | cut -d \| -f 1 | grep -qw hr_performance; then
             print_info "✅ 資料庫 'hr_performance' 存在"
             DB_EXISTS=true
         else
@@ -91,7 +91,7 @@ check_migration_status() {
     print_header "檢查 Alembic 遷移狀態"
     
     if [ "$POSTGRES_RUNNING" = true ]; then
-        if docker-compose $COMPOSE_FILE exec backend alembic current 2>/dev/null | grep -q "001"; then
+        if sudo docker-compose $COMPOSE_FILE exec backend alembic current 2>/dev/null | grep -q "001"; then
             print_info "✅ 資料庫已遷移到版本 001"
             MIGRATED=true
         else
@@ -110,7 +110,7 @@ check_tables() {
         MISSING_TABLES=()
         
         for table in "${EXPECTED_TABLES[@]}"; do
-            if docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '$table');" | grep -q "t"; then
+            if sudo docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '$table');" | grep -q "t"; then
                 print_info "✅ 資料表 '$table' 存在"
             else
                 print_error "❌ 資料表 '$table' 不存在"
@@ -136,7 +136,7 @@ check_data() {
         TABLES_TO_CHECK=("departments" "users" "rule_packs" "rules" "events" "scores")
         
         for table in "${TABLES_TO_CHECK[@]}"; do
-            COUNT=$(docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT COUNT(*) FROM $table;" | tr -d ' ')
+            COUNT=$(sudo docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT COUNT(*) FROM $table;" | tr -d ' ')
             
             if [ "$COUNT" -gt 0 ]; then
                 print_info "✅ $table: $COUNT 筆記錄"
@@ -153,33 +153,33 @@ provide_recommendations() {
     
     if [ "$POSTGRES_RUNNING" = false ]; then
         echo "🔧 需要啟動 PostgreSQL 容器："
-        echo "   docker-compose up -d postgres"
+        echo "   sudo docker-compose up -d postgres"
         echo "   或"
-        echo "   docker-compose -f docker-compose.prod.yml up -d postgres"
+        echo "   sudo docker-compose -f sudo docker-compose.prod.yml up -d postgres"
         echo ""
     fi
     
     if [ "$DB_CONNECTED" = false ] && [ "$POSTGRES_RUNNING" = true ]; then
         echo "🔧 資料庫連接問題，請檢查："
-        echo "   docker-compose logs postgres"
+        echo "   sudo docker-compose logs postgres"
         echo ""
     fi
     
     if [ "$DB_EXISTS" = false ]; then
         echo "🔧 需要創建資料庫："
-        echo "   docker-compose $COMPOSE_FILE exec postgres createdb -U postgres hr_performance"
+        echo "   sudo docker-compose $COMPOSE_FILE exec postgres createdb -U postgres hr_performance"
         echo ""
     fi
     
     if [ "$MIGRATED" = false ]; then
         echo "🔧 需要執行資料庫遷移："
-        echo "   docker-compose $COMPOSE_FILE exec backend alembic upgrade head"
+        echo "   sudo docker-compose $COMPOSE_FILE exec backend alembic upgrade head"
         echo ""
     fi
     
     if [ "$TABLES_EXIST" = true ]; then
         echo "🔧 如果需要初始化樣本資料："
-        echo "   docker-compose $COMPOSE_FILE exec backend python scripts/create_sample_data.py"
+        echo "   sudo docker-compose $COMPOSE_FILE exec backend python scripts/create_sample_data.py"
         echo ""
     fi
     

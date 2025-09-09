@@ -30,11 +30,11 @@ print_header() {
 
 # Check environment
 check_environment() {
-    if docker-compose -f docker-compose.prod.yml ps | grep -q "postgres.*Up"; then
+    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "postgres.*Up"; then
         print_info "檢測到生產環境"
-        COMPOSE_FILE="-f docker-compose.prod.yml"
+        COMPOSE_FILE="-f sudo docker-compose.prod.yml"
         ENV="production"
-    elif docker-compose ps | grep -q "postgres.*Up"; then
+    elif sudo docker-compose ps | grep -q "postgres.*Up"; then
         print_info "檢測到開發環境"
         COMPOSE_FILE=""
         ENV="development"
@@ -42,12 +42,12 @@ check_environment() {
         print_error "未檢測到運行中的 PostgreSQL 容器"
         print_info "正在啟動資料庫容器..."
         
-        if [ -f "docker-compose.prod.yml" ]; then
-            docker-compose -f docker-compose.prod.yml up -d postgres
-            COMPOSE_FILE="-f docker-compose.prod.yml"
+        if [ -f "sudo docker-compose.prod.yml" ]; then
+            sudo docker-compose -f sudo docker-compose.prod.yml up -d postgres
+            COMPOSE_FILE="-f sudo docker-compose.prod.yml"
             ENV="production"
         else
-            docker-compose up -d postgres
+            sudo docker-compose up -d postgres
             COMPOSE_FILE=""
             ENV="development"
         fi
@@ -62,7 +62,7 @@ wait_for_database() {
     print_info "等待資料庫準備就緒..."
     
     for i in {1..30}; do
-        if docker-compose $COMPOSE_FILE exec postgres pg_isready -U postgres > /dev/null 2>&1; then
+        if sudo docker-compose $COMPOSE_FILE exec postgres pg_isready -U postgres > /dev/null 2>&1; then
             print_info "✅ 資料庫已準備就緒"
             return 0
         fi
@@ -79,11 +79,11 @@ wait_for_database() {
 create_database() {
     print_header "建立資料庫"
     
-    if docker-compose $COMPOSE_FILE exec postgres psql -U postgres -lqt | cut -d \| -f 1 | grep -qw hr_performance; then
+    if sudo docker-compose $COMPOSE_FILE exec postgres psql -U postgres -lqt | cut -d \| -f 1 | grep -qw hr_performance; then
         print_info "✅ 資料庫 'hr_performance' 已存在"
     else
         print_info "建立資料庫 'hr_performance'..."
-        docker-compose $COMPOSE_FILE exec postgres createdb -U postgres hr_performance
+        sudo docker-compose $COMPOSE_FILE exec postgres createdb -U postgres hr_performance
         print_info "✅ 資料庫建立完成"
     fi
 }
@@ -95,22 +95,22 @@ run_migrations() {
     print_info "等待後端服務啟動..."
     
     # Start backend if not running
-    if ! docker-compose $COMPOSE_FILE ps | grep -q "backend.*Up"; then
+    if ! sudo docker-compose $COMPOSE_FILE ps | grep -q "backend.*Up"; then
         print_info "啟動後端服務..."
-        docker-compose $COMPOSE_FILE up -d backend
+        sudo docker-compose $COMPOSE_FILE up -d backend
         sleep 15
     fi
     
     # Run migrations
     print_info "執行 Alembic 遷移..."
-    if docker-compose $COMPOSE_FILE exec backend alembic upgrade head; then
+    if sudo docker-compose $COMPOSE_FILE exec backend alembic upgrade head; then
         print_info "✅ 資料庫遷移完成"
     else
         print_error "❌ 資料庫遷移失敗"
         print_info "嘗試手動初始化..."
         
         # Try to create tables manually using SQLModel
-        if docker-compose $COMPOSE_FILE exec backend python -c "
+        if sudo docker-compose $COMPOSE_FILE exec backend python -c "
 from app.models import *
 from app.core.database import engine
 from sqlmodel import SQLModel
@@ -129,7 +129,7 @@ print('Tables created successfully')
 create_sample_data() {
     print_header "建立範例資料"
     
-    if docker-compose $COMPOSE_FILE exec backend python scripts/create_sample_data.py; then
+    if sudo docker-compose $COMPOSE_FILE exec backend python scripts/create_sample_data.py; then
         print_info "✅ 範例資料建立完成"
     else
         print_warning "⚠️  範例資料建立失敗（可能已存在）"
@@ -145,7 +145,7 @@ verify_initialization() {
     MISSING_TABLES=()
     
     for table in "${EXPECTED_TABLES[@]}"; do
-        if docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '$table');" | grep -q "t"; then
+        if sudo docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '$table');" | grep -q "t"; then
             print_info "✅ 資料表 '$table' 存在"
         else
             MISSING_TABLES+=("$table")
@@ -160,8 +160,8 @@ verify_initialization() {
     fi
     
     # Check sample data
-    USER_COUNT=$(docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT COUNT(*) FROM users;" | tr -d ' ')
-    DEPT_COUNT=$(docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT COUNT(*) FROM departments;" | tr -d ' ')
+    USER_COUNT=$(sudo docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT COUNT(*) FROM users;" | tr -d ' ')
+    DEPT_COUNT=$(sudo docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT COUNT(*) FROM departments;" | tr -d ' ')
     
     print_info "👥 使用者數量: $USER_COUNT"
     print_info "🏢 部門數量: $DEPT_COUNT"
@@ -190,7 +190,7 @@ show_final_status() {
     echo ""
     print_info "🔧 其他管理指令："
     print_info "   檢查狀態: ./scripts/check-database.sh"
-    print_info "   查看日誌: docker-compose $COMPOSE_FILE logs -f"
+    print_info "   查看日誌: sudo docker-compose $COMPOSE_FILE logs -f"
     print_info "   重啟服務: ./quick-deploy.sh restart"
 }
 
