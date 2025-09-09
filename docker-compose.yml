@@ -78,7 +78,7 @@ services:
       - ${SYNOLOGY_DRIVE_PATH:-./evidence}:/app/evidence
       - ./logs:/app/logs
     ports:
-      - "8000:8000"
+      - "8004:8000"
     depends_on:
       - db
       - redis
@@ -101,7 +101,7 @@ services:
     container_name: hr_performance_frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "3004:80"
     depends_on:
       - backend
     networks:

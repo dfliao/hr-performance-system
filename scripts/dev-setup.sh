@@ -140,9 +140,9 @@ echo ""
 print_status "🎉 Development environment is ready!"
 echo ""
 echo "📋 Service URLs:"
-echo "   - Frontend: http://localhost:3000"
-echo "   - Backend API: http://localhost:8000"
-echo "   - API Documentation: http://localhost:8000/docs"
+echo "   - Frontend: http://localhost:3004"
+echo "   - Backend API: http://localhost:8004"
+echo "   - API Documentation: http://localhost:8004/docs"
 echo "   - Database: localhost:5432"
 echo "   - Redis: localhost:6379"
 echo ""
@@ -162,14 +162,14 @@ echo ""
 print_status "Checking service health..."
 
 # Check backend health
-if curl -s http://localhost:8000/health > /dev/null; then
+if curl -s http://localhost:8004/health > /dev/null; then
     print_status "✅ Backend is responding"
 else
     print_warning "❌ Backend is not responding. Check logs with: docker-compose logs backend"
 fi
 
 # Check frontend health
-if curl -s http://localhost:3000 > /dev/null; then
+if curl -s http://localhost:3004 > /dev/null; then
     print_status "✅ Frontend is responding"
 else
     print_warning "❌ Frontend is not responding. Check logs with: docker-compose logs frontend"
