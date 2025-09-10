@@ -1,22 +1,15 @@
 #!/bin/bash
 
-# HR Performance System - Quick Deploy Script
-# Usage: ./scripts/deploy.sh [dev|prod|update|restart|stop|logs]
-
+# HR Performance System - 一鍵部署腳本
 set -e
 
-# Colors for output
-RED='\033[0;31m'
+# Colors
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Configuration
-PROJECT_NAME="hr-performance-system"
-GIT_REPO="https://github.com/dfliao/hr-performance-system.git"
-
-# Function to print colored output
 print_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
 }
@@ -35,288 +28,136 @@ print_header() {
     echo -e "${BLUE}============================================${NC}"
 }
 
-# Check if we're in the project directory
-check_project_dir() {
-    if [ ! -f "sudo docker-compose.yml" ]; then
-        print_error "Please run this script from the project root directory"
+# Check prerequisites
+check_prerequisites() {
+    print_header "檢查系統需求"
+    
+    if ! command -v docker &> /dev/null; then
+        print_error "Docker 未安裝"
         exit 1
     fi
-}
-
-# Update code from git
-update_code() {
-    print_header "更新程式碼"
-    print_info "從 Git 拉取最新程式碼..."
+    print_info "✅ Docker 已安裝"
     
-    git fetch origin
-    git reset --hard origin/main
-    git pull origin main
-    
-    print_info "✅ 程式碼更新完成"
-}
-
-# Deploy development environment
-deploy_dev() {
-    print_header "部署開發環境"
-    
-    print_info "停止現有容器..."
-    sudo sudo docker-compose down || true
-    
-    print_info "建置並啟動開發環境..."
-    sudo sudo docker-compose up -d --build
-    
-    sleep 10
-    check_services "dev"
-}
-
-# Deploy production environment
-deploy_prod() {
-    print_header "部署生產環境"
-    
-    print_info "停止現有容器..."
-    sudo docker-compose -f sudo docker-compose.prod.yml down || true
-    
-    print_info "建置並啟動生產環境..."
-    sudo docker-compose -f sudo docker-compose.prod.yml up -d --build
-    
-    sleep 15
-    check_services "prod"
-}
-
-# Update and restart services
-update_and_restart() {
-    print_header "更新並重啟服務"
-    
-    update_code
-    
-    # Determine which environment is running
-    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
-        print_info "檢測到生產環境正在運行..."
-        deploy_prod
-    else
-        print_info "使用開發環境..."
-        deploy_dev
+    if ! command -v docker-compose &> /dev/null; then
+        print_error "Docker Compose 未安裝"
+        exit 1
     fi
+    print_info "✅ Docker Compose 已安裝"
 }
 
-# Restart services
-restart_services() {
-    print_header "重啟服務"
+# Setup environment
+setup_environment() {
+    print_header "設定環境"
     
-    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
-        print_info "重啟生產環境服務..."
-        sudo docker-compose -f sudo docker-compose.prod.yml restart
-        sleep 10
-        check_services "prod"
+    if [ ! -f ".env" ]; then
+        print_info "創建 .env 檔案..."
+        cp .env.example .env
+        print_warning "⚠️  請編輯 .env 檔案設定正確的資料庫連接參數"
     else
-        print_info "重啟開發環境服務..."
-        sudo docker-compose restart
-        sleep 10
-        check_services "dev"
-    fi
-}
-
-# Stop all services
-stop_services() {
-    print_header "停止所有服務"
-    
-    print_info "停止生產環境服務..."
-    sudo docker-compose -f sudo docker-compose.prod.yml down || true
-    
-    print_info "停止開發環境服務..."
-    sudo sudo docker-compose down || true
-    
-    print_info "✅ 所有服務已停止"
-}
-
-# Show logs
-show_logs() {
-    print_header "顯示服務日誌"
-    
-    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
-        print_info "顯示生產環境日誌..."
-        sudo docker-compose -f sudo docker-compose.prod.yml logs -f --tail=100
-    else
-        print_info "顯示開發環境日誌..."
-        sudo docker-compose logs -f --tail=100
-    fi
-}
-
-# Check service health
-check_services() {
-    local env=$1
-    print_header "檢查服務狀態"
-    
-    # Determine ports based on environment
-    if [ "$env" = "prod" ]; then
-        FRONTEND_PORT=3004
-        BACKEND_PORT=8004
-    else
-        FRONTEND_PORT=3004
-        BACKEND_PORT=8004
+        print_info "✅ .env 檔案已存在"
     fi
     
-    # Check backend
-    if curl -s "http://localhost:$BACKEND_PORT/health" > /dev/null; then
-        print_info "✅ 後端服務正常 (Port $BACKEND_PORT)"
-    else
-        print_warning "❌ 後端服務異常 (Port $BACKEND_PORT)"
-    fi
+    # Create necessary directories
+    mkdir -p logs
+    mkdir -p backup
+    mkdir -p evidence
+    print_info "✅ 目錄結構已建立"
+}
+
+# Deploy application
+deploy_app() {
+    print_header "部署應用程式"
     
-    # Check frontend
-    if curl -s "http://localhost:$FRONTEND_PORT" > /dev/null; then
-        print_info "✅ 前端服務正常 (Port $FRONTEND_PORT)"
-    else
-        print_warning "❌ 前端服務異常 (Port $FRONTEND_PORT)"
-    fi
+    print_info "停止現有服務..."
+    sudo docker-compose down || true
     
-    # Show running containers
-    print_info "運行中的容器："
-    if [ "$env" = "prod" ]; then
-        sudo docker-compose -f sudo docker-compose.prod.yml ps
-    else
-        sudo docker-compose ps
-    fi
+    print_info "建置映像檔..."
+    sudo docker-compose build
     
-    print_info "服務 URL："
-    print_info "  前端: http://localhost:$FRONTEND_PORT"
-    print_info "  後端 API: http://localhost:$BACKEND_PORT"
-    print_info "  API 文檔: http://localhost:$BACKEND_PORT/docs"
+    print_info "啟動服務..."
+    sudo docker-compose up -d
+    
+    print_info "等待服務啟動..."
+    sleep 20
+    
+    print_info "✅ 應用程式部署完成"
 }
 
 # Initialize database
 init_database() {
     print_header "初始化資料庫"
     
-    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
-        print_info "在生產環境中初始化資料庫..."
-        sudo docker-compose -f sudo docker-compose.prod.yml exec backend alembic upgrade head
-        sudo docker-compose -f sudo docker-compose.prod.yml exec backend python scripts/create_sample_data.py
+    if [ -f "scripts/init-external-mariadb.sh" ]; then
+        print_info "執行資料庫初始化..."
+        ./scripts/init-external-mariadb.sh
     else
-        print_info "在開發環境中初始化資料庫..."
-        sudo docker-compose exec backend alembic upgrade head
-        sudo docker-compose exec backend python scripts/create_sample_data.py
+        print_warning "⚠️  資料庫初始化腳本不存在，跳過此步驟"
+    fi
+}
+
+# Verify deployment
+verify_deployment() {
+    print_header "驗證部署"
+    
+    # Check services
+    print_info "檢查服務狀態..."
+    sudo docker-compose ps
+    
+    echo ""
+    
+    # Check backend health
+    sleep 5
+    if curl -s http://localhost:8004/health > /dev/null 2>&1; then
+        print_info "✅ 後端服務正常"
+    else
+        print_warning "❌ 後端服務異常，查看日誌: sudo docker-compose logs backend"
     fi
     
-    print_info "✅ 資料庫初始化完成"
-}
-
-# Backup database
-backup_database() {
-    print_header "備份資料庫"
-    
-    BACKUP_DIR="./backups"
-    mkdir -p "$BACKUP_DIR"
-    
-    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-    BACKUP_FILE="$BACKUP_DIR/hr_performance_backup_$TIMESTAMP.sql"
-    
-    if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
-        sudo docker-compose -f sudo docker-compose.prod.yml exec postgres pg_dump -U postgres hr_performance > "$BACKUP_FILE"
+    # Check frontend
+    if curl -s http://localhost:3004 > /dev/null 2>&1; then
+        print_info "✅ 前端服務正常"
     else
-        sudo docker-compose exec postgres pg_dump -U postgres hr_performance > "$BACKUP_FILE"
+        print_warning "❌ 前端服務異常，查看日誌: sudo docker-compose logs frontend"
     fi
-    
-    print_info "✅ 資料庫備份完成: $BACKUP_FILE"
 }
 
-# Clean up Docker resources
-cleanup() {
-    print_header "清理 Docker 資源"
+# Show final information
+show_final_info() {
+    print_header "部署完成"
     
-    print_info "清理未使用的容器..."
-    sudo docker container prune -f
-    
-    print_info "清理未使用的映像..."
-    sudo docker image prune -f
-    
-    print_info "清理未使用的卷..."
-    sudo docker volume prune -f
-    
-    print_info "清理未使用的網路..."
-    sudo docker network prune -f
-    
-    print_info "✅ 清理完成"
-}
-
-# Show usage
-show_usage() {
-    echo "HR Performance System 部署工具"
+    print_info "🎉 HR Performance System 部署完成！"
     echo ""
-    echo "用法: $0 [command]"
+    print_info "🌐 系統存取位址："
+    print_info "   前端: http://$(hostname):3004"
+    print_info "   後端 API: http://$(hostname):8004"
+    print_info "   API 文檔: http://$(hostname):8004/docs"
     echo ""
-    echo "指令:"
-    echo "  dev        - 部署開發環境"
-    echo "  prod       - 部署生產環境"
-    echo "  update     - 更新程式碼並重啟服務"
-    echo "  restart    - 重啟現有服務"
-    echo "  stop       - 停止所有服務"
-    echo "  logs       - 顯示服務日誌"
-    echo "  status     - 檢查服務狀態"
-    echo "  init-db    - 初始化資料庫"
-    echo "  backup-db  - 備份資料庫"
-    echo "  cleanup    - 清理 Docker 資源"
-    echo "  help       - 顯示此說明"
+    print_info "🔧 管理指令："
+    print_info "   查看狀態: ./scripts/manage.sh status"
+    print_info "   查看日誌: ./scripts/manage.sh logs"
+    print_info "   重啟服務: ./scripts/manage.sh restart"
     echo ""
-    echo "範例:"
-    echo "  $0 prod              # 部署生產環境"
-    echo "  $0 update            # 更新並重啟"
-    echo "  $0 logs              # 查看日誌"
+    print_info "👤 預設管理員帳號："
+    print_info "   使用者名稱: admin"
+    print_info "   密碼: admin123"
+    echo ""
+    print_info "💡 提示: 如需初始化資料庫，請先設定 .env 中的資料庫連接資訊"
 }
 
 # Main execution
 main() {
-    check_project_dir
+    print_header "HR Performance System - 一鍵部署"
     
-    case "$1" in
-        "dev")
-            deploy_dev
-            ;;
-        "prod")
-            deploy_prod
-            ;;
-        "update")
-            update_and_restart
-            ;;
-        "restart")
-            restart_services
-            ;;
-        "stop")
-            stop_services
-            ;;
-        "logs")
-            show_logs
-            ;;
-        "status")
-            if sudo docker-compose -f sudo docker-compose.prod.yml ps | grep -q "Up"; then
-                check_services "prod"
-            else
-                check_services "dev"
-            fi
-            ;;
-        "init-db")
-            init_database
-            ;;
-        "backup-db")
-            backup_database
-            ;;
-        "cleanup")
-            cleanup
-            ;;
-        "help"|"--help"|"-h")
-            show_usage
-            ;;
-        "")
-            print_info "沒有指定指令，顯示使用說明..."
-            show_usage
-            ;;
-        *)
-            print_error "未知指令: $1"
-            show_usage
-            exit 1
-            ;;
-    esac
+    check_prerequisites
+    setup_environment
+    deploy_app
+    
+    if [ "$1" != "--skip-db" ]; then
+        init_database
+    fi
+    
+    verify_deployment
+    show_final_info
 }
 
-# Run main function
 main "$@"

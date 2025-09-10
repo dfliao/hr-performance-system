@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Database Status Check Script
+# MariaDB Database Status Check Script
 set -e
 
 # Colors
@@ -32,19 +32,19 @@ print_header() {
 check_containers() {
     print_header "檢查 Docker 容器狀態"
     
-    if sudo docker-compose ps | grep -q "postgres.*Up"; then
-        print_info "✅ PostgreSQL 容器正在運行"
-        POSTGRES_RUNNING=true
-    elif sudo docker-compose -f docker-compose.prod.yml ps | grep -q "postgres.*Up"; then
-        print_info "✅ PostgreSQL 容器正在運行 (生產環境)"
-        POSTGRES_RUNNING=true
+    if sudo docker-compose ps | grep -q "db.*Up"; then
+        print_info "✅ MariaDB 容器正在運行"
+        DB_RUNNING=true
+    elif sudo docker-compose -f docker-compose.prod.yml ps | grep -q "db.*Up"; then
+        print_info "✅ MariaDB 容器正在運行 (生產環境)"
+        DB_RUNNING=true
         PROD_ENV=true
     else
-        print_error "❌ PostgreSQL 容器未運行"
-        POSTGRES_RUNNING=false
+        print_error "❌ MariaDB 容器未運行"
+        DB_RUNNING=false
     fi
     
-    if [ "$POSTGRES_RUNNING" = true ]; then
+    if [ "$DB_RUNNING" = true ]; then
         if [ "$PROD_ENV" = true ]; then
             COMPOSE_FILE="-f docker-compose.prod.yml"
         else
@@ -57,8 +57,8 @@ check_containers() {
 check_db_connection() {
     print_header "檢查資料庫連接"
     
-    if [ "$POSTGRES_RUNNING" = true ]; then
-        if sudo docker-compose $COMPOSE_FILE exec postgres pg_isready -U postgres > /dev/null 2>&1; then
+    if [ "$DB_RUNNING" = true ]; then
+        if sudo docker-compose $COMPOSE_FILE exec db mysqladmin ping -h localhost --silent > /dev/null 2>&1; then
             print_info "✅ 資料庫連接正常"
             DB_CONNECTED=true
         else
@@ -66,7 +66,7 @@ check_db_connection() {
             DB_CONNECTED=false
         fi
     else
-        print_error "❌ PostgreSQL 容器未運行，無法檢查連接"
+        print_error "❌ MariaDB 容器未運行，無法檢查連接"
         DB_CONNECTED=false
     fi
 }
@@ -76,7 +76,7 @@ check_database_exists() {
     print_header "檢查資料庫是否存在"
     
     if [ "$DB_CONNECTED" = true ]; then
-        if sudo docker-compose $COMPOSE_FILE exec postgres psql -U postgres -lqt | cut -d \| -f 1 | grep -qw hr_performance; then
+        if sudo docker-compose $COMPOSE_FILE exec db mysql -u root -phr_root_password_2024 -e "SHOW DATABASES LIKE 'hr_performance';" | grep -q hr_performance; then
             print_info "✅ 資料庫 'hr_performance' 存在"
             DB_EXISTS=true
         else
@@ -90,9 +90,9 @@ check_database_exists() {
 check_migration_status() {
     print_header "檢查 Alembic 遷移狀態"
     
-    if [ "$POSTGRES_RUNNING" = true ]; then
-        if sudo docker-compose $COMPOSE_FILE exec backend alembic current 2>/dev/null | grep -q "001"; then
-            print_info "✅ 資料庫已遷移到版本 001"
+    if [ "$DB_RUNNING" = true ]; then
+        if sudo docker-compose $COMPOSE_FILE exec backend alembic current 2>/dev/null | grep -q "head"; then
+            print_info "✅ 資料庫已遷移到最新版本"
             MIGRATED=true
         else
             print_warning "❌ 資料庫尚未遷移或遷移不完整"
@@ -110,7 +110,7 @@ check_tables() {
         MISSING_TABLES=()
         
         for table in "${EXPECTED_TABLES[@]}"; do
-            if sudo docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '$table');" | grep -q "t"; then
+            if sudo docker-compose $COMPOSE_FILE exec db mysql -u root -phr_root_password_2024 hr_performance -e "SHOW TABLES LIKE '$table';" | grep -q "$table"; then
                 print_info "✅ 資料表 '$table' 存在"
             else
                 print_error "❌ 資料表 '$table' 不存在"
@@ -136,7 +136,7 @@ check_data() {
         TABLES_TO_CHECK=("departments" "users" "rule_packs" "rules" "events" "scores")
         
         for table in "${TABLES_TO_CHECK[@]}"; do
-            COUNT=$(sudo docker-compose $COMPOSE_FILE exec postgres psql -U postgres -d hr_performance -t -c "SELECT COUNT(*) FROM $table;" | tr -d ' ')
+            COUNT=$(sudo docker-compose $COMPOSE_FILE exec db mysql -u root -phr_root_password_2024 hr_performance -e "SELECT COUNT(*) FROM $table;" -s -N | tr -d ' ')
             
             if [ "$COUNT" -gt 0 ]; then
                 print_info "✅ $table: $COUNT 筆記錄"
@@ -151,23 +151,23 @@ check_data() {
 provide_recommendations() {
     print_header "建議操作"
     
-    if [ "$POSTGRES_RUNNING" = false ]; then
-        echo "🔧 需要啟動 PostgreSQL 容器："
-        echo "   sudo docker-compose up -d postgres"
+    if [ "$DB_RUNNING" = false ]; then
+        echo "🔧 需要啟動 MariaDB 容器："
+        echo "   sudo docker-compose up -d db"
         echo "   或"
-        echo "   sudo docker-compose -f docker-compose.prod.yml up -d postgres"
+        echo "   sudo docker-compose -f docker-compose.prod.yml up -d db"
         echo ""
     fi
     
-    if [ "$DB_CONNECTED" = false ] && [ "$POSTGRES_RUNNING" = true ]; then
+    if [ "$DB_CONNECTED" = false ] && [ "$DB_RUNNING" = true ]; then
         echo "🔧 資料庫連接問題，請檢查："
-        echo "   sudo docker-compose logs postgres"
+        echo "   sudo docker-compose logs db"
         echo ""
     fi
     
     if [ "$DB_EXISTS" = false ]; then
         echo "🔧 需要創建資料庫："
-        echo "   sudo docker-compose $COMPOSE_FILE exec postgres createdb -U postgres hr_performance"
+        echo "   sudo docker-compose $COMPOSE_FILE exec db mysql -u root -phr_root_password_2024 -e \"CREATE DATABASE hr_performance;\""
         echo ""
     fi
     
@@ -199,7 +199,7 @@ provide_recommendations() {
 
 # Main execution
 main() {
-    print_header "HR Performance System - 資料庫狀態檢查"
+    print_header "HR Performance System - MariaDB 狀態檢查"
     
     check_containers
     check_db_connection

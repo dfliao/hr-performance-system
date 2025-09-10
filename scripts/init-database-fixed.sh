@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Database Initialization Script
+# Database Initialization Script (Fixed for Synology)
 set -e
 
 # Colors
@@ -30,11 +30,11 @@ print_header() {
 
 # Check environment
 check_environment() {
-    if sudo docker-compose -f docker-compose.prod.yml ps | grep -q "postgres.*Up"; then
+    if sudo docker-compose -f docker-compose.prod.yml ps 2>/dev/null | grep -q "postgres.*Up"; then
         print_info "檢測到生產環境"
         COMPOSE_FILE="-f docker-compose.prod.yml"
         ENV="production"
-    elif sudo docker-compose ps | grep -q "postgres.*Up"; then
+    elif sudo docker-compose ps 2>/dev/null | grep -q "postgres.*Up"; then
         print_info "檢測到開發環境"
         COMPOSE_FILE=""
         ENV="development"
@@ -43,10 +43,12 @@ check_environment() {
         print_info "正在啟動資料庫容器..."
         
         if [ -f "docker-compose.prod.yml" ]; then
+            print_info "使用生產環境配置..."
             sudo docker-compose -f docker-compose.prod.yml up -d postgres
             COMPOSE_FILE="-f docker-compose.prod.yml"
             ENV="production"
         else
+            print_info "使用開發環境配置..."
             sudo docker-compose up -d postgres
             COMPOSE_FILE=""
             ENV="development"

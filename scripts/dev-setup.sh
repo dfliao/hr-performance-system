@@ -30,7 +30,7 @@ print_header() {
 }
 
 # Check if we're in the project root
-if [ ! -f "sudo docker-compose.yml" ]; then
+if [ ! -f "docker-compose.yml" ]; then
     print_error "Please run this script from the project root directory"
     exit 1
 fi
@@ -41,7 +41,7 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v sudo docker-compose &> /dev/null; then
+if ! command -v docker-compose &> /dev/null; then
     print_error "Docker Compose is not installed. Please install Docker Compose first."
     exit 1
 fi
