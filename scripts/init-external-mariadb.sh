@@ -81,10 +81,22 @@ test_connection() {
 create_database_and_user() {
     print_header "建立資料庫和使用者"
     
+    # Safety check - confirm database creation
+    print_warning "⚠️  即將在現有 MariaDB 中建立新資料庫 '$DB_NAME'"
+    print_warning "⚠️  這不會影響現有資料庫"
+    
     # Create database
     print_info "檢查資料庫 '$DB_NAME'..."
     if mysql -h "$DB_HOST" -P "$DB_PORT" -u root -p"$DB_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" | grep -q "$DB_NAME"; then
         print_info "✅ 資料庫 '$DB_NAME' 已存在"
+        
+        # Check if database has existing tables
+        TABLE_COUNT=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u root -p"$DB_ROOT_PASSWORD" "$DB_NAME" -e "SHOW TABLES;" | wc -l)
+        if [ "$TABLE_COUNT" -gt 0 ]; then
+            print_warning "⚠️  資料庫 '$DB_NAME' 已包含 $TABLE_COUNT 個資料表"
+            print_warning "⚠️  將跳過資料庫初始化以保護現有資料"
+            return 0
+        fi
     else
         print_info "建立資料庫 '$DB_NAME'..."
         mysql -h "$DB_HOST" -P "$DB_PORT" -u root -p"$DB_ROOT_PASSWORD" -e "
