@@ -15,8 +15,10 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --silent
+# Clear npm cache and install dependencies with verbose error handling
+RUN npm cache clean --force && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm install --no-optional --verbose
 
 # Copy source code
 COPY . .
@@ -26,6 +28,9 @@ RUN npm run build
 
 # Production stage
 FROM nginx:alpine as production-stage
+
+# Install wget for health check
+RUN apk add --no-cache wget
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
@@ -51,6 +56,6 @@ EXPOSE 80
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
