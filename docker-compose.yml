@@ -69,8 +69,7 @@ services:
       - "3004:80"
     depends_on:
       - backend
-    networks:
-      - hr_network
+    network_mode: bridge
 
   # Nginx Reverse Proxy
   nginx:
