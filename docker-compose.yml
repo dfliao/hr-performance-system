@@ -48,8 +48,7 @@ services:
     ports:
       - "8004:8000"
     # No dependencies - using external services
-    networks:
-      - hr_network
+    network_mode: bridge
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -88,14 +87,6 @@ services:
     depends_on:
       - frontend
       - backend
-    networks:
-      - hr_network
+    network_mode: bridge
 
 # No volumes needed - using external services
-
-networks:
-  hr_network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
