@@ -6,7 +6,7 @@ ARG VITE_API_BASE_URL
 ARG VITE_SYNOLOGY_DRIVE_URL
 
 # Set environment variables
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_SYNOLOGY_DRIVE_URL=$VITE_SYNOLOGY_DRIVE_URL
 
@@ -14,10 +14,9 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY yarn.lock* ./
 
 # Install dependencies
-RUN npm ci --only=production --silent
+RUN npm install --silent
 
 # Copy source code
 COPY . .
