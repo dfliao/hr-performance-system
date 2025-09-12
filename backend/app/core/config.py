@@ -2,9 +2,9 @@
 Application configuration settings
 """
 
-from typing import List, Optional, Any
-from pydantic import validator, AnyHttpUrl
-from pydantic_settings import BaseSettings
+from typing import List, Optional, Any, Union
+from pydantic import validator, AnyHttpUrl, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
 
 
@@ -21,16 +21,16 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # CORS
-    CORS_ORIGINS: List[str] = [
-        "https://hr.gogopeaks.com",
-        "https://localhost:3000",
-        "http://localhost:3000"
-    ]
+    CORS_ORIGINS: Union[str, List[str]] = Field(
+        default="https://hr.gogopeaks.com,https://localhost:3000,http://localhost:3000"
+    )
     
     # Security
     SECRET_KEY: str = "hr_secret_key_2024_change_in_production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 8  # 8 hours
-    ALLOWED_HOSTS: List[str] = ["hr.gogopeaks.com", "localhost", "127.0.0.1"]
+    ALLOWED_HOSTS: Union[str, List[str]] = Field(
+        default="hr.gogopeaks.com,localhost,127.0.0.1"
+    )
     
     # Database
     DATABASE_URL: str = "mysql+pymysql://hr_user:hr_password_2024@localhost:3306/hr_performance?charset=utf8mb4"
@@ -57,15 +57,9 @@ class Settings(BaseSettings):
     SYNOLOGY_DRIVE_PATH: str = "/shared/hr-evidence"
     SYNOLOGY_DRIVE_URL: str = "https://drive.gogopeaks.com"
     MAX_FILE_SIZE: int = 100 * 1024 * 1024  # 100MB
-    ALLOWED_FILE_EXTENSIONS: List[str] = [
-        "jpg", "jpeg", "png", "gif", "bmp", "webp",  # Images
-        "pdf", "doc", "docx", "txt", "rtf",  # Documents
-        "xls", "xlsx", "csv",  # Spreadsheets
-        "ppt", "pptx",  # Presentations
-        "zip", "rar", "7z",  # Archives
-        "mp4", "avi", "mov", "wmv",  # Videos
-        "mp3", "wav", "flac"  # Audio
-    ]
+    ALLOWED_FILE_EXTENSIONS: Union[str, List[str]] = Field(
+        default="jpg,jpeg,png,gif,bmp,webp,pdf,doc,docx,txt,rtf,xls,xlsx,csv,ppt,pptx,zip,rar,7z,mp4,avi,mov,wmv,mp3,wav,flac"
+    )
     
     # External APIs
     REDMINE_URL: str = "https://redmine.gogopeaks.com"
@@ -95,44 +89,40 @@ class Settings(BaseSettings):
     API_RATE_LIMIT: int = 100  # requests per minute
     
     @validator("CORS_ORIGINS", pre=True)
-    def assemble_cors_origins(cls, v: str | List[str]) -> List[str]:
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
         if isinstance(v, str):
             if not v or v.strip() == "":
-                # Return default values if empty
                 return ["https://hr.gogopeaks.com", "https://localhost:3000", "http://localhost:3000"]
-            if not v.startswith("["):
-                return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, list):
             return v
-        raise ValueError(v)
+        return ["https://hr.gogopeaks.com", "https://localhost:3000", "http://localhost:3000"]
     
     @validator("ALLOWED_HOSTS", pre=True) 
-    def assemble_allowed_hosts(cls, v: str | List[str]) -> List[str]:
+    def assemble_allowed_hosts(cls, v: Union[str, List[str]]) -> List[str]:
         if isinstance(v, str):
             if not v or v.strip() == "":
-                # Return default values if empty
                 return ["hr.gogopeaks.com", "localhost", "127.0.0.1"]
-            if not v.startswith("["):
-                return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, list):
             return v
-        raise ValueError(v)
+        return ["hr.gogopeaks.com", "localhost", "127.0.0.1"]
     
     @validator("ALLOWED_FILE_EXTENSIONS", pre=True)
-    def assemble_file_extensions(cls, v: str | List[str]) -> List[str]:
+    def assemble_file_extensions(cls, v: Union[str, List[str]]) -> List[str]:
         if isinstance(v, str):
             if not v or v.strip() == "":
-                # Return default values if empty
                 return ["jpg", "jpeg", "png", "gif", "bmp", "webp", "pdf", "doc", "docx", "txt", "rtf", "xls", "xlsx", "csv", "ppt", "pptx", "zip", "rar", "7z", "mp4", "avi", "mov", "wmv", "mp3", "wav", "flac"]
-            if not v.startswith("["):
-                return [i.strip().lower() for i in v.split(",")]
+            return [i.strip().lower() for i in v.split(",")]
         elif isinstance(v, list):
             return [ext.lower() for ext in v]
-        raise ValueError(v)
+        return ["jpg", "jpeg", "png", "gif", "bmp", "webp", "pdf", "doc", "docx", "txt", "rtf", "xls", "xlsx", "csv", "ppt", "pptx", "zip", "rar", "7z", "mp4", "avi", "mov", "wmv", "mp3", "wav", "flac"]
     
-    class Config:
-        case_sensitive = True
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        case_sensitive=True,
+        env_file=".env",
+        env_file_encoding="utf-8"
+    )
 
 
 # Create settings instance
