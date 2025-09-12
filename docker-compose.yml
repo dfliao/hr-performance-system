@@ -43,8 +43,9 @@ services:
       # Timezone
       TZ: Asia/Taipei
     volumes:
-      - ${SYNOLOGY_DRIVE_PATH:-./evidence}:/app/evidence
-      - ./logs:/app/logs
+      - ./volumes/evidence:/app/evidence
+      - ./volumes/logs:/app/logs
+      - ./volumes/uploads:/app/uploads
     ports:
       - "8004:8000"
     # No dependencies - using external services
