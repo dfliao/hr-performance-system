@@ -12,7 +12,8 @@
       "Bash(sudo chown:*)",
       "Bash(sudo chmod:*)",
       "Bash(docker-compose build:*)",
-      "Bash(docker compose:*)"
+      "Bash(docker compose:*)",
+      "Read(/Users/DFLiao/Documents/@Gogopeaks.com/IT/**)"
     ],
     "deny": [],
     "ask": []
