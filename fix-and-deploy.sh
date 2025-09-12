@@ -49,11 +49,11 @@ main() {
     mkdir -p ./volumes/evidence ./volumes/logs ./volumes/uploads
     chmod 755 ./volumes/evidence ./volumes/logs ./volumes/uploads
     
-    # 4. 重建並啟動服務
-    print_info "🔨 重建和啟動服務..."
+    # 4. 只建置和啟動後端（前端有問題暫時跳過）
+    print_info "🔨 建置和啟動後端服務..."
     sudo docker-compose down --remove-orphans 2>/dev/null || true
-    sudo docker-compose build --no-cache
-    sudo docker-compose up -d
+    sudo docker-compose build backend --no-cache
+    sudo docker-compose up -d backend
     
     # 5. 等待服務啟動
     print_info "⏳ 等待服務啟動..."
