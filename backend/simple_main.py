@@ -73,7 +73,12 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     """Initialize database on startup"""
-    create_db_and_tables()
+    try:
+        create_db_and_tables()
+        print("✅ Database connection successful!")
+    except Exception as e:
+        print(f"⚠️ Database connection failed: {e}")
+        print("⚠️ Service will start without database connection")
 
 @app.get("/")
 async def root():
