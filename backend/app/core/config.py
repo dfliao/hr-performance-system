@@ -3,7 +3,8 @@ Application configuration settings
 """
 
 from typing import List, Optional, Any
-from pydantic import BaseSettings, validator, AnyHttpUrl
+from pydantic import validator, AnyHttpUrl
+from pydantic_settings import BaseSettings
 import os
 
 

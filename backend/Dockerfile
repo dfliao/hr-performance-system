@@ -29,13 +29,15 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Copy project
 COPY . .
 
-# Create non-root user
-RUN adduser --disabled-password --gecos '' appuser \
-    && chown -R appuser:appuser /app
-USER appuser
+# Create non-root user first
+RUN adduser --disabled-password --gecos '' appuser
 
-# Create necessary directories
-RUN mkdir -p /app/logs /app/evidence
+# Create necessary directories with proper ownership
+RUN mkdir -p /app/logs /app/evidence \
+    && chown -R appuser:appuser /app \
+    && chmod -R 755 /app/evidence /app/logs
+
+USER appuser
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
@@ -45,4 +47,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 EXPOSE 8000
 
 # Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
