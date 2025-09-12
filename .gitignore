@@ -71,7 +71,6 @@ logs/
 # Output files
 output/
 *.csv
-*.json
 *.xlsx
 
 # Temporary files
