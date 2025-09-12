@@ -96,25 +96,37 @@ class Settings(BaseSettings):
     
     @validator("CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: str | List[str]) -> List[str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
+        if isinstance(v, str):
+            if not v or v.strip() == "":
+                # Return default values if empty
+                return ["https://hr.gogopeaks.com", "https://localhost:3000", "http://localhost:3000"]
+            if not v.startswith("["):
+                return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
             return v
         raise ValueError(v)
     
     @validator("ALLOWED_HOSTS", pre=True) 
     def assemble_allowed_hosts(cls, v: str | List[str]) -> List[str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
+        if isinstance(v, str):
+            if not v or v.strip() == "":
+                # Return default values if empty
+                return ["hr.gogopeaks.com", "localhost", "127.0.0.1"]
+            if not v.startswith("["):
+                return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
             return v
         raise ValueError(v)
     
     @validator("ALLOWED_FILE_EXTENSIONS", pre=True)
     def assemble_file_extensions(cls, v: str | List[str]) -> List[str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip().lower() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
+        if isinstance(v, str):
+            if not v or v.strip() == "":
+                # Return default values if empty
+                return ["jpg", "jpeg", "png", "gif", "bmp", "webp", "pdf", "doc", "docx", "txt", "rtf", "xls", "xlsx", "csv", "ppt", "pptx", "zip", "rar", "7z", "mp4", "avi", "mov", "wmv", "mp3", "wav", "flac"]
+            if not v.startswith("["):
+                return [i.strip().lower() for i in v.split(",")]
+        elif isinstance(v, list):
             return [ext.lower() for ext in v]
         raise ValueError(v)
     
