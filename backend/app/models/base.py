@@ -4,8 +4,8 @@ Base model with common fields
 
 from datetime import datetime
 from typing import Optional
-from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, DateTime, func
+from sqlmodel import SQLModel, Field, Column
+from sqlalchemy import DateTime, func
 
 
 class BaseModel(SQLModel):

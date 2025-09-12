@@ -102,19 +102,14 @@ class AuditLog(BaseModel, table=True):
     is_sensitive: bool = Field(default=False, index=True)
     requires_review: bool = Field(default=False, index=True)
     
-    # Timestamp (from BaseModel, but indexed for audit logs)
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow,
-        index=True,
-        description="When the action occurred"
-    )
+    # Note: Using created_at from BaseModel as the timestamp
     
     # Relationships
     actor: Optional["User"] = Relationship(back_populates="audit_logs")
     
     def __str__(self):
         actor_str = self.actor_username or f"User#{self.actor_id}" or "System"
-        return f"{actor_str} {self.action} {self.entity_type}#{self.entity_id} at {self.timestamp}"
+        return f"{actor_str} {self.action} {self.entity_type}#{self.entity_id} at {self.created_at}"
     
     @property
     def risk_level(self) -> str:
@@ -195,7 +190,6 @@ class AuditLogRead(SQLModel):
     risk_score: int
     is_sensitive: bool
     requires_review: bool
-    timestamp: datetime
     created_at: datetime
     
     # Related data
@@ -230,7 +224,7 @@ class AuditLogFilter(SQLModel):
     limit: int = Field(default=100, ge=1, le=1000)
     
     # Sorting
-    sort_by: str = Field(default="timestamp")
+    sort_by: str = Field(default="created_at")
     sort_order: str = Field(default="desc")  # asc or desc
 
 
