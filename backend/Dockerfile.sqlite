@@ -1,0 +1,29 @@
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV TZ=Asia/Taipei
+
+# Set work directory
+WORKDIR /app
+
+# Install dependencies for SQLite
+RUN pip install fastapi==0.104.1 uvicorn[standard]==0.24.0 sqlmodel==0.0.14
+
+# Copy sqlite main file
+COPY sqlite_main.py .
+
+# Create directories and non-root user
+RUN mkdir -p /tmp && \
+    adduser --disabled-password --gecos '' appuser && \
+    chown -R appuser:appuser /app && \
+    chmod 755 /tmp
+
+USER appuser
+
+# Expose port
+EXPOSE 8000
+
+# Run the SQLite application
+CMD ["uvicorn", "sqlite_main:app", "--host", "0.0.0.0", "--port", "8000"]
