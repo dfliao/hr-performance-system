@@ -54,13 +54,13 @@ class Event(BaseModel, table=True):
     description: str = Field(max_length=1000)
     
     # Evidence and Documentation
-    evidence_urls: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
+    evidence_urls: Optional[List[str]] = Field(default=None, sa_column_kwargs={"type_": JSON})
     evidence_count: int = Field(default=0)
     
     # Source and Metadata
     source: EventSource = Field(default=EventSource.MANUAL)
     external_id: Optional[str] = Field(default=None, max_length=100, index=True)  # For integration tracking
-    source_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    source_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column_kwargs={"type_": JSON})
     
     # Workflow
     status: EventStatus = Field(default=EventStatus.PENDING)

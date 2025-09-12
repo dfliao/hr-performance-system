@@ -62,17 +62,17 @@ class AuditLog(BaseModel, table=True):
     # Change Details
     old_values: Optional[Dict[str, Any]] = Field(
         default=None,
-        sa_column=Column(JSON),
+        sa_column_kwargs={"type_": JSON},
         description="Previous values before change"
     )
     new_values: Optional[Dict[str, Any]] = Field(
         default=None,
-        sa_column=Column(JSON), 
+        sa_column_kwargs={"type_": JSON}, 
         description="New values after change"
     )
     diff: Optional[Dict[str, Any]] = Field(
         default=None,
-        sa_column=Column(JSON),
+        sa_column_kwargs={"type_": JSON},
         description="Computed difference between old and new values"
     )
     
@@ -80,7 +80,7 @@ class AuditLog(BaseModel, table=True):
     description: Optional[str] = Field(default=None, max_length=500)
     metadata: Optional[Dict[str, Any]] = Field(
         default=None,
-        sa_column=Column(JSON),
+        sa_column_kwargs={"type_": JSON},
         description="Additional context and metadata"
     )
     

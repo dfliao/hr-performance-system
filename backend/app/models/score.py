@@ -42,7 +42,7 @@ class Score(BaseModel, table=True):
     # Rule Breakdown
     rule_breakdown: Optional[Dict[str, Any]] = Field(
         default=None, 
-        sa_column=Column(JSON),
+        sa_column_kwargs={"type_": JSON},
         description="Breakdown by rule categories and individual rules"
     )
     

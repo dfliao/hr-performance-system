@@ -52,8 +52,8 @@ class RulePack(BaseModel, table=True):
     effective_to: Optional[date] = Field(default=None)
     
     # Configuration
-    json_schema: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    weight_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    json_schema: Optional[Dict[str, Any]] = Field(default=None, sa_column_kwargs={"type_": JSON})
+    weight_config: Optional[Dict[str, Any]] = Field(default=None, sa_column_kwargs={"type_": JSON})
     
     # Metadata
     created_by: int = Field(foreign_key="users.id")
