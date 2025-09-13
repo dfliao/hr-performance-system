@@ -4,8 +4,8 @@ Event model - Performance events with scoring
 
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any
-from sqlmodel import SQLModel, Field, Relationship, Column
-from sqlalchemy import JSON
+from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import JSON, Column
 from enum import Enum
 
 from app.models.base import BaseModel
@@ -55,13 +55,13 @@ class Event(BaseModel, table=True):
     description: str = Field(max_length=1000)
     
     # Evidence and Documentation
-    evidence_urls: Optional[List[str]] = Field(default=None, sa_column_kwargs={"type_": JSON})
+    evidence_urls: Optional[List[str]] = Field(default=None, sa_column=Column(JSON))
     evidence_count: int = Field(default=0)
     
     # Source and Metadata
     source: EventSource = Field(default=EventSource.MANUAL)
     external_id: Optional[str] = Field(default=None, max_length=100, index=True)  # For integration tracking
-    source_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column_kwargs={"type_": JSON})
+    source_metadata: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Workflow
     status: EventStatus = Field(default=EventStatus.PENDING)

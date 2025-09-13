@@ -4,8 +4,8 @@ Rule Pack and Rule models - Configurable scoring rules
 
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any
-from sqlmodel import SQLModel, Field, Relationship, Column
-from sqlalchemy import JSON
+from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import JSON, Column
 from enum import Enum
 
 from app.models.base import BaseModel
@@ -53,8 +53,8 @@ class RulePack(BaseModel, table=True):
     effective_to: Optional[date] = Field(default=None)
     
     # Configuration
-    json_schema: Optional[Dict[str, Any]] = Field(default=None, sa_column_kwargs={"type_": JSON})
-    weight_config: Optional[Dict[str, Any]] = Field(default=None, sa_column_kwargs={"type_": JSON})
+    json_schema: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    weight_config: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
     # Metadata
     created_by: int = Field(foreign_key="users.id")

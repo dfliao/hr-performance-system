@@ -4,8 +4,8 @@ Audit Log model - Complete operation tracking for compliance
 
 from datetime import datetime
 from typing import Optional, Dict, Any
-from sqlmodel import SQLModel, Field, Relationship, Column
-from sqlalchemy import JSON
+from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import JSON, Column
 from enum import Enum
 
 from app.models.base import BaseModel
@@ -63,17 +63,17 @@ class AuditLog(BaseModel, table=True):
     # Change Details
     old_values: Optional[Dict[str, Any]] = Field(
         default=None,
-        sa_column_kwargs={"type_": JSON},
+        sa_column=Column(JSON),
         description="Previous values before change"
     )
     new_values: Optional[Dict[str, Any]] = Field(
         default=None,
-        sa_column_kwargs={"type_": JSON}, 
+        sa_column=Column(JSON), 
         description="New values after change"
     )
     diff: Optional[Dict[str, Any]] = Field(
         default=None,
-        sa_column_kwargs={"type_": JSON},
+        sa_column=Column(JSON),
         description="Computed difference between old and new values"
     )
     
@@ -81,7 +81,7 @@ class AuditLog(BaseModel, table=True):
     description: Optional[str] = Field(default=None, max_length=500)
     metadata: Optional[Dict[str, Any]] = Field(
         default=None,
-        sa_column_kwargs={"type_": JSON},
+        sa_column=Column(JSON),
         description="Additional context and metadata"
     )
     

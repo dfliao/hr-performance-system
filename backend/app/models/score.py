@@ -4,8 +4,8 @@ Score model - Calculated performance scores (cached results)
 
 from datetime import datetime
 from typing import Optional, Dict, Any
-from sqlmodel import SQLModel, Field, Relationship, Column
-from sqlalchemy import JSON
+from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import JSON, Column
 
 from app.models.base import BaseModel
 
@@ -43,7 +43,7 @@ class Score(BaseModel, table=True):
     # Rule Breakdown
     rule_breakdown: Optional[Dict[str, Any]] = Field(
         default=None, 
-        sa_column_kwargs={"type_": JSON},
+        sa_column=Column(JSON),
         description="Breakdown by rule categories and individual rules"
     )
     
