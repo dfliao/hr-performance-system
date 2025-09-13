@@ -4,7 +4,8 @@ Audit Log model - Complete operation tracking for compliance
 
 from datetime import datetime
 from typing import Optional, Dict, Any
-from sqlmodel import SQLModel, Field, Relationship, Column, JSON
+from sqlmodel import SQLModel, Field, Relationship, Column
+from sqlalchemy import JSON
 from enum import Enum
 
 from app.models.base import BaseModel

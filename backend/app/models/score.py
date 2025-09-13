@@ -4,7 +4,8 @@ Score model - Calculated performance scores (cached results)
 
 from datetime import datetime
 from typing import Optional, Dict, Any
-from sqlmodel import SQLModel, Field, Relationship, Column, JSON
+from sqlmodel import SQLModel, Field, Relationship, Column
+from sqlalchemy import JSON
 
 from app.models.base import BaseModel
 

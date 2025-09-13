@@ -4,7 +4,8 @@ Event model - Performance events with scoring
 
 from datetime import datetime, date
 from typing import Optional, List, Dict, Any
-from sqlmodel import SQLModel, Field, Relationship, Column, JSON
+from sqlmodel import SQLModel, Field, Relationship, Column
+from sqlalchemy import JSON
 from enum import Enum
 
 from app.models.base import BaseModel
