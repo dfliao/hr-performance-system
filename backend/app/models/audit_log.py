@@ -79,7 +79,7 @@ class AuditLog(BaseModel, table=True):
     
     # Context and Metadata
     description: Optional[str] = Field(default=None, max_length=500)
-    metadata: Optional[Dict[str, Any]] = Field(
+    extra_metadata: Optional[Dict[str, Any]] = Field(
         default=None,
         sa_column=Column(JSON),
         description="Additional context and metadata"
