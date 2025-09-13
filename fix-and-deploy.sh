@@ -65,12 +65,12 @@ main() {
     
     # 7. 測試 API
     print_info "🧪 測試 API..."
-    if timeout 15 curl -f http://localhost:8004/health > /dev/null 2>&1; then
+    if timeout 15 curl -f http://localhost:8008/health > /dev/null 2>&1; then
         print_info "✅ 後端服務正常"
         
         # 測試資料庫
         print_info "🗄️  測試資料庫..."
-        curl -s http://localhost:8004/api/v1/test/db | head -3
+        curl -s http://localhost:8008/api/v1/test/db | head -3
         echo ""
         
     else
@@ -80,7 +80,7 @@ main() {
     fi
     
     # 8. 測試前端
-    if timeout 15 curl -f http://localhost:3004 > /dev/null 2>&1; then
+    if timeout 15 curl -f http://localhost:3008 > /dev/null 2>&1; then
         print_info "✅ 前端服務正常"
     else
         print_error "❌ 前端服務異常"
@@ -97,9 +97,9 @@ main() {
     fi
     
     print_info "🌐 服務 URL："
-    print_info "   前端: http://localhost:3004"
-    print_info "   後端: http://localhost:8004"
-    print_info "   API 文檔: http://localhost:8004/docs"
+    print_info "   前端: http://localhost:3008"
+    print_info "   後端: http://localhost:8008"
+    print_info "   API 文檔: http://localhost:8008/docs"
     
     print_info "🎉 部署完成！"
 }

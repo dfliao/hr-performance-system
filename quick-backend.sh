@@ -48,18 +48,18 @@ main() {
     
     # 6. 測試 API
     print_info "🧪 測試後端 API..."
-    if timeout 10 curl -f http://localhost:8004/health > /dev/null 2>&1; then
+    if timeout 10 curl -f http://localhost:8008/health > /dev/null 2>&1; then
         print_info "✅ 後端 API 正常"
         
         # 測試資料庫
         print_info "🗄️  測試資料庫連接..."
-        curl -s http://localhost:8004/api/v1/test/db
+        curl -s http://localhost:8008/api/v1/test/db
         echo ""
         
         print_info "🌐 後端服務已啟動："
-        print_info "   後端 API: http://localhost:8004"
-        print_info "   健康檢查: http://localhost:8004/health"
-        print_info "   API 文檔: http://localhost:8004/docs"
+        print_info "   後端 API: http://localhost:8008"
+        print_info "   健康檢查: http://localhost:8008/health"
+        print_info "   API 文檔: http://localhost:8008/docs"
         
     else
         print_info "❌ 後端啟動失敗，檢查日誌："
