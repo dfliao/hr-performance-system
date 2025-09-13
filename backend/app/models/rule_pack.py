@@ -74,7 +74,10 @@ class RulePack(BaseModel, table=True):
         }
     )
     target_department: Optional["Department"] = Relationship()
-    rules: List["Rule"] = Relationship(back_populates="rule_pack", cascade_delete=True)
+    rules: List["Rule"] = Relationship(
+        back_populates="rule_pack",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
     
     def __str__(self):
         return f"{self.name} v{self.version} ({self.scope})"
