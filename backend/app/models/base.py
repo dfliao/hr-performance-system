@@ -13,12 +13,10 @@ class BaseModel(SQLModel):
     
     id: Optional[int] = Field(default=None, primary_key=True)
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        sa_column=Column(DateTime, server_default=func.now())
+        default_factory=datetime.utcnow
     )
     updated_at: Optional[datetime] = Field(
-        default=None,
-        sa_column=Column(DateTime, onupdate=func.now())
+        default=None
     )
     
     class Config:
